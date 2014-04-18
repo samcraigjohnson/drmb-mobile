@@ -44,6 +44,18 @@ class DDPClient(WebSocketClient):
 
 		self.send(msg)
 
+	def call(self, method, params):
+		msg = {"msg" : "method"}
+		msg['method'] = method
+		msg['params'] = params
+		msg['id'] = "testCall"
+
+		self.send(msg)
+
+	def login(self, username, password):
+		self.call("login", [{"password": password, "user": {"username": username}}])
+
+
 if __name__ == '__main__':
 	try:
 		ws = DDPClient("localhost", 3000)
@@ -53,7 +65,7 @@ if __name__ == '__main__':
 			if ws.connected and count == 1:
 				print "WORKS!"
 				print "subscribing"
-				ws.subscribe("userData")
+				ws.login("sam", "johnson")
 				count -= 1
 
 	except KeyboardInterrupt:
