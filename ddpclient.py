@@ -2,7 +2,6 @@ from ws4py.client.threadedclient import WebSocketClient
 import json
 import uuid
 
-
 class DDPClient(WebSocketClient):
 
 	DDP_VER = ["pre1"]
@@ -130,7 +129,7 @@ if __name__ == '__main__':
 				ws.login("sam", "johnson")
 				ws.subscribe("spending")
 				count -= 1
-				
+
 	except KeyboardInterrupt:
 		print ws.collections
 		ws.close()

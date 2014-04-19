@@ -1,0 +1,16 @@
+#:kivy 1.8.0
+
+<LoginScreen>:
+	f_username: username
+	f_password: password
+	GridLayout:
+		rows: 2
+		Label:
+			text: "Username: "
+		TextInput:
+			id: username
+		Label:
+			text: "Password"
+		TextInput:
+			id: password
+			password: True
