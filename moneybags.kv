@@ -1,10 +1,24 @@
 #:kivy 1.8.0
 
+<MainScreen>:
+	total: total_label
+	BoxLayout:
+		size: root.size
+		canvas:
+			Color:
+				rgb: 1, 1, 1
+			Rectangle:
+				size: self.size
+		orientation: 'vertical'
+		Label:
+			id: total_label
+			text: "Total left: "
+			color: (.2, .2, .2, 1)
+
 <LoginScreen>:
 	f_username: username
 	f_password: password
 	id: login_screen
-	total: total_label
 	GridLayout:
 		size: root.size
 		canvas:
@@ -13,7 +27,7 @@
 			Rectangle:
 				size: self.size
 		
-		rows: 6
+		rows: 5
 		cols: 1
 		row_default_height: "40dp"
 		padding: 10
@@ -39,8 +53,3 @@
 		Button:
 			text: "Login"
 			on_press: root.login()
-
-		Label:
-			id: total_label
-			text: "Total left:"
-			color: (.2, .2, .2, 1)

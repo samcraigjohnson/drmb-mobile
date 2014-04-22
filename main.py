@@ -3,12 +3,12 @@ kivy.require('1.8.0')
 
 from kivy.app import App
 from kivy.uix.widget import Widget
-from kivy.uix.textinput import TextInput
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.button import Button
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+
 from ddpclient import DDPClient
+
 
 class BackendManager():
 
@@ -17,8 +17,16 @@ class BackendManager():
 	def __init__(self):
 		self.ddp = DDPClient(self, "localhost", 3000)
 		self.ddp.connect()
-		self.login = LoginScreen()
-		self.login.set_manager(self)
+		
+		self.sm = ScreenManager(transition=NoTransition())
+		self.login = LoginScreen(name="Login")
+		self.login.set_ddp_manager(self)
+		self.main_screen = MainScreen(name="Main")
+		self.main_screen.set_ddp_manager(self)
+
+		self.sm.add_widget(self.login)
+		self.sm.add_widget(self.main_screen)
+
 		self.subs_ready = 0
 		self.dispatcher = {"login": self.notify_login}
 
@@ -38,9 +46,11 @@ class BackendManager():
 			for exp in self.ddp.collections['expenses'][0]['spending']:
 				total += float(exp['amount'])
 
-			total = float(self.ddp.collections['budgets'][0]['total']) - total
+			budj = self.ddp.collections['budgets'][0]
+			total = float(budj['total']) - total - float(budj['save'])
 
-			self.login.total.text += str(total)
+			self.main_screen.total.text += str(total)
+			self.sm.current = "Main"
 
 
 	def login_user(self, u, pwd):
@@ -53,20 +63,25 @@ class BackendManager():
 				self.ddp.subscribe(sub)
 
 
-class LoginScreen(Widget):
+class LoginScreen(Screen):
 	f_username = ObjectProperty(None)
 	f_password = ObjectProperty(None)
-	total = ObjectProperty(None)
+	ddp_manager = None
 
-	manager = None
-
-	def set_manager(self, manager):
-		self.manager = manager	
+	def set_ddp_manager(self, ddp_manager):
+		self.ddp_manager = ddp_manager	
 
 	def login(self):
 		uname = self.f_username.text
 		pwd = self.f_password.text
-		self.manager.login_user(uname, pwd)
+		self.ddp_manager.login_user(uname, pwd)
+
+class MainScreen(Screen):
+	total = ObjectProperty(None)
+	ddp_manager = None
+
+	def set_ddp_manager(self, ddp_manager):
+		self.ddp_manager = ddp_manager	
 
 class MoneybagsApp(App):
 	def on_start(self):
@@ -79,8 +94,8 @@ class MoneybagsApp(App):
 		pass
 
 	def build(self):
-		manager = BackendManager()
-		return manager.login
+		ddp_manager = BackendManager()
+		return ddp_manager.sm
 
 if __name__ == '__main__':
 	MoneybagsApp().run()
