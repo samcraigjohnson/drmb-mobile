@@ -4,6 +4,7 @@
 	f_username: username
 	f_password: password
 	id: login_screen
+	total: total_label
 	GridLayout:
 		size: root.size
 		canvas:
@@ -12,7 +13,7 @@
 			Rectangle:
 				size: self.size
 		
-		rows: 5
+		rows: 6
 		cols: 1
 		row_default_height: "40dp"
 		padding: 10
@@ -38,3 +39,8 @@
 		Button:
 			text: "Login"
 			on_press: root.login()
+
+		Label:
+			id: total_label
+			text: "Total left:"
+			color: (.2, .2, .2, 1)

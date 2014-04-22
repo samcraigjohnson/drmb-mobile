@@ -8,13 +8,17 @@ class DDPClient(WebSocketClient):
 	WS_URL = "ws://{}:{}/websocket"
 
 
-	def __init__(self, server, port=80):
+	def __init__(self, manager, server, port=80):
 		url = self.WS_URL.format(server, str(port))
 		WebSocketClient.__init__(self, url)
 		self.connected = False
 		self.subs = {}
 		self.collections = {}
 		self.pending_msg = []
+		self.completed_msg = []
+		self.current_errors = []
+		self.logged_in = False
+		self.manager = manager
 		self.dispatcher = {"added": self.on_added, "error": self.on_error, 
 							"result": self.on_result, "changed": self.on_changed,
 							"ready": self.on_ready}
@@ -34,6 +38,7 @@ class DDPClient(WebSocketClient):
 	#called when received a message from the server
 	def received_message(self, m):
 		msg = json.loads(str(m))
+		print m
 		if 'msg' in msg:
 			m_txt = msg['msg']
 			if m_txt in self.dispatcher:
@@ -48,12 +53,23 @@ class DDPClient(WebSocketClient):
 	def on_ready(self, msg):
 		for i in msg['subs']:
 			self.subs[i]['ready'] = True
+			self.manager.notify_ready()
 
 	#called when a result message is recieved
 	def on_result(self, msg):
-		if msg['id'] in self.pending_msg:
-			indx = self.pending_msg.index(msg['id'])
-			print "message recieved"
+		indx = 0
+		found = False
+		for pm in self.pending_msg:
+			if pm['id'] == msg['id']:
+				if(pm['method'] == "login"):
+					self.logged_in = True
+				
+				self.manager.notify(pm['method'])
+				self.completed_msg.append(pm)
+				found = True
+			if not found:
+				indx += 1
+		if found:
 			del self.pending_msg[indx]
 
 	#called on an error message	
@@ -71,8 +87,6 @@ class DDPClient(WebSocketClient):
 
 		coll[indx] = msg['fields']
 		coll[indx]['id'] = msg['id']
-		#self.collections[msg['collection']] = coll
-
 
 	#called when a document is added to the collection			
 	def on_added(self, msg):
@@ -90,10 +104,10 @@ class DDPClient(WebSocketClient):
 		if(params != None):
 			msg['params'] = params
 
+		self.send(msg)
 		to_append = msg
 		to_append['ready'] = False
 		self.subs[msg['id']] = to_append  
-		self.send(msg)
 
 	#used to call a method
 	def call(self, method, params):
@@ -103,11 +117,13 @@ class DDPClient(WebSocketClient):
 		msg['id'] = str(uuid.uuid4())
 
 
-		self.pending_msg.append(msg['id'])
+		self.pending_msg.append(msg)
 		self.send(msg)
 
 	def login(self, username, password):
 		self.call("login", [{"password": password, "user": {"username": username}}])
+		while not self.logged_in:
+			pass
 
 
 if __name__ == '__main__':
