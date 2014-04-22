@@ -3,14 +3,38 @@
 <LoginScreen>:
 	f_username: username
 	f_password: password
+	id: login_screen
 	GridLayout:
-		rows: 2
+		size: root.size
+		canvas:
+			Color:
+				rgb: 1, 1, 1
+			Rectangle:
+				size: self.size
+		
+		rows: 5
+		cols: 1
+		row_default_height: "40dp"
+		padding: 10
 		Label:
-			text: "Username: "
+			text: "Username:"
+			color: (.5, .5, .5, 1)
+
 		TextInput:
+			height: "20dp"
 			id: username
+			multiline: False
+		
 		Label:
 			text: "Password"
+			color: (.5, .5, .5, 1)
+		
 		TextInput:
+			height: "20dp"
 			id: password
 			password: True
+			multiline:False
+		
+		Button:
+			text: "Login"
+			on_press: root.login()
