@@ -63,6 +63,7 @@ class DDPClient(WebSocketClient):
 			if pm['id'] == msg['id']:
 				if(pm['method'] == "login"):
 					self.logged_in = True
+					self.manager.token = msg['result']['token']
 				
 				self.manager.notify(pm['method'])
 				self.completed_msg.append(pm)
@@ -122,8 +123,11 @@ class DDPClient(WebSocketClient):
 
 	def login(self, username, password):
 		self.call("login", [{"password": password, "user": {"username": username}}])
-		while not self.logged_in:
-			pass
+	
+	def token_login(self, token):
+		print "attempting token login:" + str(token)
+		self.call("login", [{"resume" : str(token) }])
+
 
 
 if __name__ == '__main__':

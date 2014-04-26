@@ -1,15 +1,49 @@
 #:kivy 1.8.0
 
+<BigCircle>
+	canvas.before:
+		Color:
+			rgb: .18, .54, .34
+		Ellipse:
+			size: min(self.size), min(self.size)
+			pos: root.center_x - min(self.size)/2, root.center_y - min(self.size)/2
+
+	Label:
+		id: total_label
+		text: "Total left: "
+		color: (1, 1, 1, 1)
+		font_size: dp(20)		
+		pos: root.center_x - min(self.size)/2, root.center_y - min(self.size)/2
+
+<DrActionBar>
+	pos_hint: {'top':1}
+	background_color: (.2, .2, .2, .8)
+	ActionView:
+		use_seperator: True
+		ActionPrevious:
+			title: "Dr. Moneybags"
+			with_previous: False
+			app_icon: 'images/2happyface.png'
+		ActionOverflow:
+		ActionButton:
+			text: "+"
+
 <MainScreen>:
 	total: total_label
-	BoxLayout:
+	GridLayout
 		size: root.size
+		cols: 1
 		canvas:
 			Color:
 				rgb: 1, 1, 1
 			Rectangle:
 				size: self.size
-		orientation: 'vertical'
+		spacing: 20
+		DrActionBar:
+			id: act_bar
+		BigCircle:
+			id: big_cir
+			size_hint: (.5, .5)
 		Label:
 			id: total_label
 			text: "Total left: "
